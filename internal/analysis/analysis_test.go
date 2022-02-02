@@ -10,7 +10,7 @@ import (
 	"github.com/110y/go-test-name/internal/analysis"
 )
 
-func TestGetExprTypeInfo(t *testing.T) {
+func TestGetTestInfo(t *testing.T) {
 	t.Parallel()
 
 	tests := map[string]struct {
