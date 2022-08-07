@@ -18,12 +18,20 @@ func TestGetTestInfo(t *testing.T) {
 		pos      int
 		expected *analysis.TestInfo
 	}{
-		"function call which returns single context.Context variable": {
+		"should return TestInfo includes expected TestFuncName and SubTestNames": {
 			path: "package1/file1_test.go",
 			pos:  178,
 			expected: &analysis.TestInfo{
 				TestFuncName: "TestFoo",
 				SubTestNames: []string{"sub test name"},
+			},
+		},
+		"should return TestInfo includes expected TestFuncName and SubTestNames with escaping regexp meta characters": {
+			path: "package1/file1_test.go",
+			pos:  229,
+			expected: &analysis.TestInfo{
+				TestFuncName: "TestFoo",
+				SubTestNames: []string{`sub test name includes \(regexp meta characters\)`},
 			},
 		},
 	}

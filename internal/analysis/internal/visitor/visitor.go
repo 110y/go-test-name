@@ -4,6 +4,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"regexp"
 	"strconv"
 )
 
@@ -63,7 +64,7 @@ func (v *Visitor) Visit(node ast.Node) ast.Visitor {
 										if err != nil {
 											return nil
 										}
-										v.subTestNames = append(v.subTestNames, s)
+										v.subTestNames = append(v.subTestNames, regexp.QuoteMeta(s))
 										return nil
 									}
 								}
