@@ -15,6 +15,9 @@ func TestFoo(t *testing.T) {
 		"sub test name": {
 			expected: "expected",
 		},
+		"sub test name includes (regexp meta characters)": {
+			expected: "expected",
+		},
 	}
 
 	for name, test := range tests {
