@@ -32,3 +32,28 @@ func TestFoo(t *testing.T) {
 		})
 	}
 }
+
+func TestBar(t *testing.T) {
+	t.Parallel()
+
+	for name, test := range map[string]struct {
+		expected string
+	}{
+		"sub test name": {
+			expected: "expected",
+		},
+		"sub test name includes (regexp meta characters)": {
+			expected: "expected",
+		},
+	} {
+		test := test
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			actual := "actual"
+			if diff := cmp.Diff(test.expected, actual); diff != "" {
+				t.Errorf("\n(-expected, +actual)\n%s", diff)
+			}
+		})
+	}
+}
