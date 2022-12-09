@@ -26,9 +26,6 @@ type Visitor struct {
 
 	testFuncName string
 	subTestNames []string
-
-	inTestCasesStatement bool
-	inMapExpr            bool
 }
 
 func (v *Visitor) Visit(node ast.Node) ast.Visitor {
@@ -51,27 +48,20 @@ func (v *Visitor) Visit(node ast.Node) ast.Visitor {
 		return v
 	}
 
-	if !v.inTestCasesStatement {
-		if stmt, ok := node.(*ast.AssignStmt); ok {
-			if len(stmt.Rhs) > 0 {
-				if clit, ok := stmt.Rhs[0].(*ast.CompositeLit); ok {
-					if _, ok := clit.Type.(*ast.MapType); ok {
-						for _, elt := range clit.Elts {
-							if v.cursorPos >= v.getPositionOffset(elt.Pos()) && v.cursorPos <= v.getPositionOffset(elt.End()) {
-								if kve, ok := elt.(*ast.KeyValueExpr); ok {
-									if bl, ok := kve.Key.(*ast.BasicLit); ok && bl.Kind == token.STRING {
-										s, err := strconv.Unquote(bl.Value)
-										if err != nil {
-											return nil
-										}
-										v.subTestNames = append(v.subTestNames, regexp.QuoteMeta(s))
-										return nil
-									}
-								}
-							}
-						}
-					}
+	if stmt, ok := node.(*ast.AssignStmt); ok {
+		if len(stmt.Rhs) > 0 {
+			if clit, ok := stmt.Rhs[0].(*ast.CompositeLit); ok {
+				if v.extractSubTestNamesFromCompositeLit(clit) {
+					return nil
 				}
+			}
+		}
+	}
+
+	if stmt, ok := node.(*ast.RangeStmt); ok {
+		if clit, ok := stmt.X.(*ast.CompositeLit); ok {
+			if v.extractSubTestNamesFromCompositeLit(clit) {
+				return nil
 			}
 		}
 	}
@@ -85,6 +75,26 @@ func (v *Visitor) GetFuncName() string {
 
 func (v *Visitor) GetSubTestNames() []string {
 	return v.subTestNames
+}
+
+func (v *Visitor) extractSubTestNamesFromCompositeLit(clit *ast.CompositeLit) bool {
+	if _, ok := clit.Type.(*ast.MapType); ok {
+		for _, elt := range clit.Elts {
+			if v.cursorPos >= v.getPositionOffset(elt.Pos()) && v.cursorPos <= v.getPositionOffset(elt.End()) {
+				if kve, ok := elt.(*ast.KeyValueExpr); ok {
+					if bl, ok := kve.Key.(*ast.BasicLit); ok && bl.Kind == token.STRING {
+						s, err := strconv.Unquote(bl.Value)
+						if err != nil {
+							return true
+						}
+						v.subTestNames = append(v.subTestNames, regexp.QuoteMeta(s))
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false
 }
 
 func (v *Visitor) getPositionOffset(pos token.Pos) int {

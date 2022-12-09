@@ -34,6 +34,14 @@ func TestGetTestInfo(t *testing.T) {
 				SubTestNames: []string{`sub test name includes \(regexp meta characters\)`},
 			},
 		},
+		"should return TestInfo includes expected TestFuncName and SubTestNames for ": {
+			path: "package1/file1_test.go",
+			pos:  676,
+			expected: &analysis.TestInfo{
+				TestFuncName: "TestBar",
+				SubTestNames: []string{`sub test name`},
+			},
+		},
 	}
 
 	for name, test := range tests {
